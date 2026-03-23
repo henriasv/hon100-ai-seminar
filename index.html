@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HON1000 — Gruppelærerguide: Autonom AI og kodeagenter</title>
+    <style>
+        :root {
+            --bg: #fff;
+            --sidebar-bg: #f8f9fb;
+            --text: #333;
+            --muted: #6b7280;
+            --heading: #1a1a1a;
+            --accent: #0063cc;
+            --accent-hover: #004999;
+            --border: #e5e7eb;
+            --code-bg: #f6f8fa;
+            --admonition-note: #0063cc;
+            --admonition-note-bg: #f0f6ff;
+            --admonition-warn: #9a6700;
+            --admonition-warn-bg: #fff8e6;
+            --admonition-tip: #1a7f37;
+            --admonition-tip-bg: #f0fdf4;
+            --admonition-important: #7c3aed;
+            --admonition-important-bg: #f5f0ff;
+            --sidebar-width: 260px;
+            --content-max: 48rem;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            z-index: 50;
+        }
+        .sidebar-title {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--heading);
+            line-height: 1.3;
+        }
+        .sidebar-title small {
+            display: block;
+            font-weight: 400;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 0.15rem;
+        }
+        .sidebar-nav {
+            list-style: none;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 0.35rem 1.25rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-left: 3px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+        .sidebar-nav .sep {
+            height: 1px;
+            background: var(--border);
+            margin: 0.6rem 1.25rem;
+        }
+
+        /* Content */
+        .content {
+            margin-left: var(--sidebar-width);
+            max-width: calc(var(--content-max) + 4rem);
+            padding: 2.5rem 2rem 5rem;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--heading);
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+        .lead {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--heading);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--heading);
+            margin: 1.5rem 0 0.5rem;
+        }
+        p { margin-bottom: 0.75rem; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul, ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        li { margin-bottom: 0.3rem; }
+        em { color: var(--muted); }
+
+        /* Timeline table */
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .timetable th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 2px solid var(--border);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .timetable td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        .timetable td:first-child {
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--heading);
+            width: 80px;
+        }
+        .timetable td:nth-child(2) {
+            font-weight: 600;
+            width: 200px;
+        }
+
+        /* Code / prompt blocks */
+        .prompt-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            margin: 0.75rem 0;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* Admonitions (Furo style) */
+        .admonition {
+            border-left: 3px solid;
+            border-radius: 2px;
+            padding: 0.75rem 1rem;
+            margin: 0.75rem 0;
+            font-size: 0.9rem;
+        }
+        .admonition-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .admonition.note { border-color: var(--admonition-note); background: var(--admonition-note-bg); }
+        .admonition.note .admonition-title { color: var(--admonition-note); }
+        .admonition.warning { border-color: var(--admonition-warn); background: var(--admonition-warn-bg); }
+        .admonition.warning .admonition-title { color: var(--admonition-warn); }
+        .admonition.tip { border-color: var(--admonition-tip); background: var(--admonition-tip-bg); }
+        .admonition.tip .admonition-title { color: var(--admonition-tip); }
+        .admonition.important { border-color: var(--admonition-important); background: var(--admonition-important-bg); }
+        .admonition.important .admonition-title { color: var(--admonition-important); }
+
+        /* Reading list */
+        .reading-item {
+            margin-bottom: 0.75rem;
+            padding-left: 0;
+        }
+        .reading-item .meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        /* Demo tabs */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+        .tab-btn {
+            padding: 0.5rem 1.25rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--muted);
+            font-family: inherit;
+            margin-bottom: -1px;
+        }
+        .tab-btn:hover { color: var(--heading); }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        .tab-content {
+            border: 1px solid var(--border);
+            border-top: none;
+        }
+        .tab-frame {
+            width: 100%;
+            border: none;
+            display: none;
+        }
+        .tab-frame.active { display: block; }
+
+        /* Collapsible details */
+        details {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin: 0.75rem 0;
+        }
+        details summary {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--heading);
+            background: var(--code-bg);
+            border-radius: 6px;
+            user-select: none;
+        }
+        details[open] summary {
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+        }
+        details .details-body {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+        details .details-body h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 1rem 0 0.3rem;
+            color: var(--heading);
+        }
+        details .details-body h4:first-child {
+            margin-top: 0;
+        }
+        details .details-body p {
+            margin-bottom: 0.5rem;
+        }
+        details .details-body ul {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Terminal output */
+        .terminal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin: 0.75rem 0;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .terminal .err { color: #f48771; }
+        .terminal .ok { color: #89d185; }
+        .terminal .dim { color: #808080; }
+
+        /* Separator */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .content { margin-left: 0; padding: 1.5rem 1rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-title">
+        HON1000
+        <small>Autonom AI og kodeagenter</small>
+    </div>
+    <ul class="sidebar-nav">
+        <li><a href="#tidsplan">Tidsplan</a></li>
+        <li><a href="#leselekse">Leselekse</a></li>
+        <div class="sep"></div>
+        <li><a href="#demo1">Demo 1: Det imponerende</a></li>
+        <li><a href="#demo2">Demo 2: Det problematiske</a></li>
+        <li><a href="#demo3">Demo 3: Faglig resonering</a></li>
+        <div class="sep"></div>
+        <li><a href="#gruppearbeid">Gruppearbeid</a></li>
+        <li><a href="#oppsummering">Oppsummering</a></li>
+        <div class="sep"></div>
+        <li><a href="samtale.html">Samtalelogg</a></li>
+    </ul>
+</aside>
+
+<div class="content">
+
+    <h1>Gruppelærerguide</h1>
+    <p class="lead">Seminar: Autonom AI og kodeagenter &mdash; 2 timer</p>
+
+    <!-- TIDSPLAN -->
+    <h2 id="tidsplan">Tidsplan</h2>
+
+    <table class="timetable">
+        <thead>
+            <tr><th>Tid</th><th>Del</th><th>Beskrivelse</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>30 min</td>
+                <td>Diskusjon av tekstene</td>
+                <td>Hva er Shumers sterkeste og svakeste argument? Hva tilfører kritikerne? Hvem har bevisbyrden?</td>
+            </tr>
+            <tr>
+                <td>40 min</td>
+                <td>Live-demo av Claude Code</td>
+                <td>Vis en kodeagent i aksjon &mdash; først noe som imponerer, deretter noe som avslører svakheter. Bruk promptene nedenfor.</td>
+            </tr>
+            <tr>
+                <td>30 min</td>
+                <td>Gruppearbeid</td>
+                <td>Tverrfaglige grupper velger en oppgave fra sitt fag som en AI-agent i prinsippet kunne utføre. Diskuter kapabilitet, pålitelighet og konsekvenser av feil.</td>
+            </tr>
+            <tr>
+                <td>20 min</td>
+                <td>Oppsummering</td>
+                <td>Når er et system &laquo;autonomt&raquo; i meningsfull forstand? Hva er forskjellen mellom verktøy og agent?</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- LESELEKSE -->
+    <h2 id="leselekse">Leselekse</h2>
+
+    <p>Tre obligatoriske tekster med motstridende perspektiver:</p>
+
+    <ol>
+        <li class="reading-item">
+            <a href="https://fortune.com/2026/02/11/something-big-is-happening-ai-february-2020-moment-matt-shumer/" target="_blank">Matt Shumer: &laquo;Something big is happening&raquo;</a> (Fortune, 11. feb. 2026)<br>
+            <span class="meta">AI-gr&uuml;nder som hevder vi er i en &laquo;februar 2020&raquo;-fase &mdash; at kodeagenter allerede gj&oslash;r jobben hans bedre enn ham selv. Lest 80+ millioner ganger.</span>
+        </li>
+        <li class="reading-item">
+            <a href="https://www.forbes.com/sites/paulocarvao/2026/02/13/the-problem-with-techs-latest-something-big-is-happening-manifesto/" target="_blank">Paulo Carv&atilde;o: &laquo;The problem with tech's latest manifesto&raquo;</a> (Forbes, 13. feb. 2026)<br>
+            <span class="meta">Harvard-forsker som svarer at Shumers budskap er et salgsargument forkledd som advarsel. Skiller mellom teknologisk kapabilitet, kommersielle insentiver og sosial tilpasning.</span>
+        </li>
+        <li class="reading-item">
+            <a href="https://fortune.com/2026/02/28/peter-cappelli-wharton-something-big-happening-in-ai-but-not-panic-robots-are-coming/" target="_blank">Peter Cappelli: &laquo;Something big is happening in AI, but panic is the wrong reaction&raquo;</a> (Fortune, 28. feb. 2026)<br>
+            <span class="meta">Wharton-professor som setter debatten i historisk perspektiv: roboter siden 1964, selvkj&oslash;rende biler &laquo;innen 2019&raquo;, produktivitetsl&oslash;fter som aldri kom.</span>
+        </li>
+    </ol>
+
+    <div class="admonition important">
+        <div class="admonition-title">Refleksjonsspørsmål</div>
+        Er Shumers pandemi-analogi treffende eller villedende? Hvem har mest å vinne på at folk er bekymret? Hva ville &laquo;autonom AI&raquo; bety for ditt eget fag?
+    </div>
+
+    <!-- DEMO 1 -->
+    <h2 id="demo1">Demo 1: &laquo;Det imponerende&raquo; &mdash; nettside fra ingenting</h2>
+
+    <h3>Prompt til Claude Code</h3>
+    <div class="prompt-block">Lag en interaktiv nettside som viser Norges befolkningsutvikling fra 1900 til 2024.
+
+Krav:
+- Bruk reelle tall fra SSB (hardkod dataene direkte i koden — ikke bruk API)
+- Vis dataene som et interaktivt linjediagram med Chart.js
+- Brukeren skal kunne hover over datapunkter for å se årstall og befolkningstall
+- Inkluder en kort forklarende tekst på norsk over diagrammet
+- Alt skal være i én HTML-fil
+
+Etter at du har skrevet koden: åpne filen, test at den fungerer,
+og fiks eventuelle problemer. Iterer til diagrammet rendrer korrekt
+og interaksjonen fungerer. Ikke lever fra deg før du har verifisert
+at siden fungerer.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Diskusjon</div>
+        Hastigheten. At naturlig språk er &laquo;programmeringsspråket.&raquo; At Shumer beskriver nøyaktig dette. Spør studentene: &laquo;Hva skjedde egentlig her? Hvem programmerte?&raquo;
+    </div>
+
+    <div class="admonition tip">
+        <div class="admonition-title">Tips til gruppelærer</div>
+        Kjør demoen live om mulig &mdash; det er mye mer virkningsfullt å se prosessen i sanntid enn å vise ferdig resultat. Vis gjerne terminalen underveis. Resultatet nedenfor er backup.
+    </div>
+
+    <h3>Ferdig resultat</h3>
+    <p>Vi ba også Claude Code gjøre siden &laquo;psykedelisk&raquo; &mdash; for å vise at oppfølgingsprompts fungerer og at agenten kan iterere på eget arbeid.</p>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('clean')">Ren versjon</button>
+        <button class="tab-btn" onclick="switchTab('psychedelic')">Psykedelisk versjon</button>
+    </div>
+    <div class="tab-content">
+        <iframe class="tab-frame active" id="frame-clean" src="befolkning.html"></iframe>
+        <iframe class="tab-frame" id="frame-psychedelic" src="befolkning-psykedelisk.html"></iframe>
+    </div>
+
+    <!-- DEMO 2 -->
+    <h2 id="demo2">Demo 2: &laquo;Det problematiske&raquo; &mdash; hallusinasjon og falsk selvsikkerhet</h2>
+
+    <h3>Prompt til Claude Code</h3>
+    <div class="prompt-block">Skriv et Python-script som henter sanntids værdata for Oslo fra
+Meteorologisk institutts Frost API (frost.met.no), beregner
+gjennomsnittlig temperatur for de siste 7 dagene, og printer resultatet.
+
+Bruk riktig autentisering og feilhåndtering. Test at scriptet kjører
+og returnerer korrekte data. Fiks eventuelle feil og iterer til det fungerer.</div>
+
+    <div class="admonition warning">
+        <div class="admonition-title">Forventet oppførsel</div>
+        Claude Code vil sannsynligvis generere kode som <em>ser</em> riktig ut men feiler. Den kjenner kanskje ikke API-et korrekt, den har ikke API-nøkkel, og den kan hallusinere endepunkter. Koden ser profesjonell ut, men fungerer ikke.
+    </div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Diskusjon</div>
+        Hva betyr det for tillit at koden <em>ser</em> riktig ut? Hvordan ville en student uten programmeringserfaring oppdage feilen? Hva er forskjellen mellom &laquo;se kompetent ut&raquo; og &laquo;være kompetent&raquo;? Koble tilbake til Carvão-artikkelen om salgsargumenter forkledd som advarsler.
+    </div>
+
+    <div class="admonition tip">
+        <div class="admonition-title">Tips til gruppelærer</div>
+        Kjør denne live. La studentene se at Claude Code prøver, feiler, prøver igjen &mdash; og til slutt kanskje gir opp eller lager noe som bare <em>later som</em> det virker. Kontrasten med Demo 1 er poenget.
+    </div>
+
+    <details>
+        <summary>Hva skjedde da vi testet denne prompen</summary>
+        <div class="details-body">
+
+            <h4>Koden som ble produsert</h4>
+            <p>Claude Code genererte et velskrevet Python-script (<code>demo2_frost.py</code>) med riktig API-endepunkt (<code>frost.met.no/observations/v0.jsonld</code>), riktig stasjons-ID for Blindern (SN18700), korrekt autentiseringsmetode (HTTP Basic Auth), og god feilhåndtering. Koden ser profesjonell og overbevisende ut.</p>
+
+            <h4>Hva skjedde da den kjørte</h4>
+            <div class="terminal"><span class="dim">$ python demo2_frost.py</span>
+ADVARSEL: Miljøvariabelen FROST_CLIENT_ID er ikke satt.
+Du kan registrere deg på https://frost.met.no/ for å få en klient-ID.
+
+Henter temperaturdata for Oslo (Blindern) fra 2026-03-16 til 2026-03-23...
+
+HTTP-statuskode: <span class="err">401</span>
+<span class="err">Feil 401: Ikke autorisert. Sjekk at FROST_CLIENT_ID er korrekt.</span></div>
+
+            <h4>Hvorfor feilet det?</h4>
+            <ul>
+                <li><strong>Manglende API-nøkkel:</strong> Frost API krever registrering på frost.met.no for å få en personlig klient-ID. AI-en kan ikke skaffe denne selv.</li>
+                <li><strong>Umulig å verifisere:</strong> Selv om endepunktene og parameterne <em>sannsynligvis</em> er riktige, kan vi ikke verifisere at parsing-logikken faktisk fungerer med ekte data.</li>
+                <li><strong>Iterasjonsløkken stopper:</strong> Prompten ba AI-en &laquo;fikse feil og iterere til det fungerer&raquo; &mdash; men den fundamentale feilen (manglende nøkkel) er ikke noe AI-en kan fikse.</li>
+            </ul>
+
+            <h4>Hva dette illustrerer</h4>
+            <p>Koden bruker kjente, korrekte detaljer (stasjonsnavn, API-URL, autentiseringsmetode) som gir et inntrykk av at alt er riktig. En student uten programmeringserfaring ville ha vanskelig for å oppdage at noe mangler. <strong>Gapet mellom &laquo;ser riktig ut&raquo; og &laquo;er verifisert&raquo; er poenget.</strong></p>
+        </div>
+    </details>
+
+    <!-- DEMO 3 -->
+    <h2 id="demo3">Demo 3 (alternativ): Faglig resonering</h2>
+
+    <h3>Prompt til Claude Code</h3>
+    <div class="prompt-block">Bevis at det finnes uendelig mange primtall. Presenter beviset steg for steg,
+og skriv deretter et Python-script som verifiserer de første 20 stegene
+i resonnementet ditt med konkrete tall. Test scriptet og vis output.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Diskusjon</div>
+        Skillet mellom å <em>reprodusere</em> et kjent bevis (som den klarer) og å resonnere selvstendig. Hva skjer om du ber om et <em>uløst</em> problem? Hvor går grensen mellom &laquo;husket kunnskap&raquo; og &laquo;genuint resonnement&raquo;?
+    </div>
+
+    <div class="admonition tip">
+        <div class="admonition-title">Tips til gruppelærer</div>
+        Bruk denne som alternativ om du har tid, eller hvis Demo 2 ikke gir tydelig nok feilsituasjon. Spør studentene: &laquo;Beviste den dette, eller husket den det?&raquo;
+    </div>
+
+    <details>
+        <summary>Hva skjedde da vi testet denne prompten</summary>
+        <div class="details-body">
+
+            <h4>Beviset som ble presentert</h4>
+            <p>Claude Code presenterte Euklids klassiske bevis ved selvmotsigelse (ca. 300 f.Kr.): anta at det finnes endelig mange primtall p1, ..., pn. Konstruer Q&nbsp;=&nbsp;p1&middot;p2&middot;...&middot;pn&nbsp;+&nbsp;1. Da er Q&nbsp;mod&nbsp;pi&nbsp;=&nbsp;1 for alle i, så ingen pi deler Q &mdash; men Q&nbsp;&gt;&nbsp;1 må ha en primfaktor. Selvmotsigelse. QED.</p>
+
+            <h4>Output fra scriptet (utdrag)</h4>
+            <div class="terminal"><span class="dim">$ python demo3_primtall.py</span>
+
+<span class="ok">======================================================================
+BEVIS: Det finnes uendelig mange primtall
+Verifikasjon av de 20 første stegene i resonnementet
+======================================================================</span>
+
+Steg  1: Anta at de eneste primtallene er {2}
+         Q = 2 + 1 = 3
+         Q mod pi = 1 for alle pi i listen  <span class="ok">[OK]</span>
+         Nye primtall utenfor listen: {3} -> SELVMOTSIGELSE! <span class="ok">[OK]</span>
+         Merk: Q = 3 er selv et primtall!
+
+Steg  6: Anta at de eneste primtallene er {2, 3, 5, 7, 11, 13}
+         Q = 2 * 3 * 5 * 7 * 11 * 13 + 1 = 30031
+         Q mod pi = 1 for alle pi i listen  <span class="ok">[OK]</span>
+         Primfaktorisering av Q: 59 * 509
+         Nye primtall utenfor listen: {59, 509} -> SELVMOTSIGELSE! <span class="ok">[OK]</span>
+
+Steg 20: Anta at de eneste primtallene er {2, 3, ..., 71}
+         Q = 557940830126698960967415391
+         Q mod pi = 1 for alle pi i listen  <span class="ok">[OK]</span>
+         Primfaktorisering av Q: 1063 * 303049 * 598841 * 2892214489673
+         Nye primtall utenfor listen: {1063, ...} -> SELVMOTSIGELSE! <span class="ok">[OK]</span>
+
+<span class="ok">======================================================================
+ALLE 20 STEG VERIFISERT.
+======================================================================</span></div>
+
+            <h4>Hva dette illustrerer</h4>
+            <ul>
+                <li><strong>Reproduksjon, ikke oppdagelse:</strong> Euklids bevis er et av de mest kjente i matematikkens historie og finnes overalt i treningsdataene. AI-en reproduserer et mønster, den &laquo;oppdager&raquo; ingenting.</li>
+                <li><strong>Imponerende kobling teori&ndash;kode:</strong> Oversettelsen fra abstrakt bevis til kjørende Python med korrekt faktorisering og assertions er genuint nyttig.</li>
+                <li><strong>Hva om vi ba om noe uløst?</strong> For genuint uløste problemer (Goldbachs formodning, Riemannhypotesen) ville AI-en sannsynligvis produsere noe som <em>ser ut som</em> et gyldig bevis, men inneholder subtile logiske feil.</li>
+                <li><strong>Nøkkelspørsmålet:</strong> &laquo;Beviste den dette, eller husket den det?&raquo;</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- GRUPPEARBEID -->
+    <h2 id="gruppearbeid">Gruppearbeid</h2>
+
+    <p>Tverrfaglige grupper velger en oppgave fra ett av sine fag som en AI-agent i prinsippet kunne utføre.</p>
+
+    <ul>
+        <li>Hva er oppgaven? Beskriv den presist.</li>
+        <li>Hva ville gå bra? Hva ville sannsynligvis gå galt?</li>
+        <li>Hva er konsekvensen av feil? (Lav for et hobbyprosjekt, høy for medisinsk rådgivning.)</li>
+        <li>Trenger man ekspertise for å <em>oppdage</em> at AI-en tok feil?</li>
+    </ul>
+
+    <div class="admonition tip">
+        <div class="admonition-title">Tips til gruppelærer</div>
+        Oppfordre gruppene til å være konkrete. &laquo;AI i helsevesenet&raquo; er for vagt &mdash; &laquo;AI som skriver epikriser basert på journalnotater&raquo; er nyttig. Poenget er at konsekvenser av feil varierer enormt mellom domener.
+    </div>
+
+    <!-- OPPSUMMERING -->
+    <h2 id="oppsummering">Oppsummering og avslutning</h2>
+
+    <h3>Sentrale spørsmål</h3>
+    <ul>
+        <li>Når er et system &laquo;autonomt&raquo; i meningsfull forstand?</li>
+        <li>Hva er forskjellen mellom verktøy og agent?</li>
+        <li>Er en kalkulator autonom? En stavekontroll? En kodeagent?</li>
+        <li>Hvem har ansvar når en AI-agent gjør feil?</li>
+    </ul>
+
+    <h3>Studentene prøver selv</h3>
+    <p>Oppfordre studentene til å prøve Claude Code (krever Claude Pro, $20/mnd) eller Claude i chat (gratis) på noe fra sitt eget fag. Dokumenter hva som fungerte og hva som ikke fungerte &mdash; ta med til neste gang.</p>
+    <p>Quickstart: <a href="https://code.claude.com/docs/en/quickstart" target="_blank">code.claude.com/docs/en/quickstart</a></p>
+
+    <footer>
+        HON1000 &mdash; Universitetet i Oslo &middot; Gruppelærerguide generert med Claude Code
+    </footer>
+
+</div>
+
+<script>
+    function resizeFrame(frame) {
+        try {
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            frame.style.height = doc.documentElement.scrollHeight + 'px';
+        } catch (e) {}
+    }
+
+    function resizeAllActive() {
+        document.querySelectorAll('.tab-frame.active').forEach(resizeFrame);
+    }
+
+    document.querySelectorAll('.tab-frame').forEach(frame => {
+        frame.addEventListener('load', () => resizeFrame(frame));
+    });
+
+    window.addEventListener('resize', resizeAllActive);
+
+    // Listen for resize messages from iframes (after async chart render)
+    window.addEventListener('message', e => {
+        if (e.data && e.data.type === 'iframe-resize') {
+            document.querySelectorAll('.tab-frame').forEach(frame => {
+                try {
+                    if (frame.contentWindow === e.source) {
+                        frame.style.height = e.data.height + 'px';
+                    }
+                } catch (err) {}
+            });
+        }
+    });
+
+    function switchTab(which) {
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-frame').forEach(f => f.classList.remove('active'));
+        if (which === 'clean') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('frame-clean').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('frame-psychedelic').classList.add('active');
+        }
+        resizeAllActive();
+    }
+
+    // Highlight active sidebar link on scroll
+    const sections = document.querySelectorAll('h2[id]');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(s => {
+            if (window.scrollY >= s.offsetTop - 80) current = s.id;
+        });
+        navLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+    });
+
+    // Smooth scroll (only for same-page anchors)
+    navLinks.forEach(a => {
+        if (!a.getAttribute('href').startsWith('#')) return;
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+</script>
+
+</body>
+</html>

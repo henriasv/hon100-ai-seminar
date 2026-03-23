@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HON1000 — Samtalelogg: Hvordan denne nettsiden ble til</title>
+    <style>
+        :root {
+            --bg: #fff;
+            --sidebar-bg: #f8f9fb;
+            --text: #333;
+            --muted: #6b7280;
+            --heading: #1a1a1a;
+            --accent: #0063cc;
+            --border: #e5e7eb;
+            --code-bg: #f6f8fa;
+            --user-bg: #f0f6ff;
+            --user-border: #0063cc;
+            --ai-bg: #f8f9fb;
+            --ai-border: #d1d5db;
+            --sidebar-width: 260px;
+            --content-max: 48rem;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            z-index: 50;
+        }
+        .sidebar-title {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--heading);
+            line-height: 1.3;
+        }
+        .sidebar-title small {
+            display: block;
+            font-weight: 400;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 0.15rem;
+        }
+        .sidebar-nav {
+            list-style: none;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 0.35rem 1.25rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-left: 3px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+        .sidebar-nav .sep {
+            height: 1px;
+            background: var(--border);
+            margin: 0.6rem 1.25rem;
+        }
+
+        /* Content */
+        .content {
+            margin-left: var(--sidebar-width);
+            max-width: calc(var(--content-max) + 4rem);
+            padding: 2.5rem 2rem 5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--heading);
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+        .lead {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--heading);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        p { margin-bottom: 0.75rem; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul, ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        li { margin-bottom: 0.3rem; }
+
+        /* Chat messages */
+        .msg {
+            border-left: 3px solid;
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .msg-user {
+            border-color: var(--user-border);
+            background: var(--user-bg);
+        }
+        .msg-ai {
+            border-color: var(--ai-border);
+            background: var(--ai-bg);
+        }
+        .msg-label {
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+        .msg-user .msg-label { color: var(--user-border); }
+        .msg-ai .msg-label { color: var(--muted); }
+        .msg p:last-child { margin-bottom: 0; }
+        .msg code {
+            background: rgba(0,0,0,0.06);
+            padding: 0.1rem 0.35rem;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            font-family: ui-monospace, "SF Mono", "Consolas", monospace;
+        }
+        .msg ul { margin-top: 0.3rem; margin-bottom: 0; }
+
+        /* Action annotation */
+        .action {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-style: italic;
+            padding: 0.3rem 0 0.3rem 1rem;
+            border-left: 2px dashed var(--border);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Admonition */
+        .admonition {
+            border-left: 3px solid;
+            border-radius: 2px;
+            padding: 0.75rem 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .admonition-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .admonition.note { border-color: #0063cc; background: #f0f6ff; }
+        .admonition.note .admonition-title { color: #0063cc; }
+
+        /* Code blocks */
+        .codeblock {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-family: ui-monospace, "SF Mono", "Consolas", monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .content { margin-left: 0; padding: 1.5rem 1rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-title">
+        HON1000
+        <small>Autonom AI og kodeagenter</small>
+    </div>
+    <ul class="sidebar-nav">
+        <li><a href="index.html">Tilbake til guiden</a></li>
+        <div class="sep"></div>
+        <li><a href="#intro">Introduksjon</a></li>
+        <li><a href="#steg1">1. Befolkningsvisualisering</a></li>
+        <li><a href="#steg2">2. Feilretting av API-kall</a></li>
+        <li><a href="#steg3">3. Psykedelisk versjon</a></li>
+        <li><a href="#steg4">4. Instruktorsiden</a></li>
+        <li><a href="#steg5">5. Furo-redesign</a></li>
+        <li><a href="#steg6">6. Iframe-tilpasning</a></li>
+        <li><a href="#steg7">7. Testing av demoer</a></li>
+        <li><a href="#steg8">8. Denne siden</a></li>
+        <li><a href="#steg9">9. Ødelagt lenke</a></li>
+        <li><a href="#steg10">10. Manglende æøå</a></li>
+        <li><a href="#steg11">11. Oppdatert logg</a></li>
+        <div class="sep"></div>
+        <li><a href="#refleksjon">Refleksjon</a></li>
+    </ul>
+</aside>
+
+<div class="content">
+
+    <h1>Samtalelogg</h1>
+    <p class="lead">Hvordan denne nettsiden ble laget &mdash; en komplett logg av samtalen mellom menneske og AI</p>
+
+    <h2 id="intro">Kontekst</h2>
+    <p>Denne siden dokumenterer den faktiske samtalen mellom en seminarleder og Claude Code (Claude Opus 4.6) som produserte hele gruppelærerguiden. Samtalen fant sted 23. mars 2026 og tok 11 interaksjoner fra tomt prosjekt til ferdig nettside.</p>
+    <p>Mappen var helt tom da vi startet. Alt &mdash; HTML, CSS, JavaScript, API-integrasjoner, testresultater &mdash; ble produsert i denne ene samtalen.</p>
+
+    <div class="admonition note">
+        <div class="admonition-title">Merk</div>
+        Loggen er forkortet og redigert for lesbarhet. Tekniske detaljer som fullstendige kodeblokker er oppsummert. Samtalen er likevel tro mot det faktiske forløpet, inkludert feil som ble gjort og rettet underveis.
+    </div>
+
+    <!-- STEG 1 -->
+    <h2 id="steg1">1. Befolkningsvisualisering</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Lag en nettside som visualiserer Norges befolkningsutvikling fra 1900 til i dag som et interaktivt linjediagram. Bruk SSB-data. Siden skal ha en slider der brukeren kan velge årstall og se befolkningstallet.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Oppretter <code>index.html</code> med Chart.js-diagram, slider, og live-data fra SSBs API (tabell 05803). Åpner filen i nettleseren.</p>
+    </div>
+
+    <div class="action">Claude Code skriver en komplett HTML-fil med innebygd JavaScript som gjør POST-kall mot SSBs JSON-stat2 API, tegner et linjediagram, og kobler en slider til en vertikal markerlinje. Filen åpnes automatisk i nettleseren.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Hva som faktisk skjedde</div>
+        Claude Code brukte feil variabelnavn i API-kallet. Den antok at tabellen hadde variablene <code>Kjønn</code> og <code>Alder</code> (fra en annen SSB-tabell), men tabell 05803 bruker <code>ContentsCode</code> og <code>Tid</code>. Siden åpnet seg, men viste ingen data. Feilen ble ikke oppdaget før brukeren ba om testing.
+    </div>
+
+    <!-- STEG 2 -->
+    <h2 id="steg2">2. Feilretting &mdash; API-kallet fungerte ikke</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Sjekk om applikasjonen fungerer.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Tester API-kallet med <code>curl</code> &mdash; får HTTP 400. Undersøker tabellens metadata, oppdager feil variabelnavn. Retter til <code>ContentsCode: "Personer"</code>. Verifiserer med et fullstendig kall: 126 datapunkter, 1900 (2 217 971) til 2025 (5 594 340).</p>
+    </div>
+
+    <div class="action">Claude Code gjør følgende i rekkefølge: (1) sender et test-kall som feiler med 400, (2) henter tabellens metadata for å finne riktige variabelnavn, (3) tester med riktige verdier og får 200 OK, (4) oppdaterer HTML-filen, (5) verifiserer at alle 126 år returneres uten null-verdier.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        AI-en hadde selvsikker feil kunnskap om API-et. Den antok at tabell 05803 hadde kjønn- og aldersvariabler (som er vanlig i andre SSB-tabeller), men denne tabellen er en enkel tidsserie. Feilen ble først oppdaget da brukeren eksplisitt ba om testing &mdash; AI-en testet ikke selv.
+    </div>
+
+    <!-- STEG 3 -->
+    <h2 id="steg3">3. Psykedelisk versjon</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Kan du få nettsiden til å se litt psykedelisk ut også?</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Omskriver hele CSS-en: mørk bakgrunn, flytende neon-orber, blinkende stjerner, regnbue-gradient på linjediagrammet, glassmorfisme-kort, animert tekst. Funksjonen er identisk, bare utseendet er endret.</p>
+    </div>
+
+    <div class="action">Claude Code skriver om hele filen med ~200 linjer ny CSS inkludert @keyframes-animasjoner, og tilpasser Chart.js-konfigurasjonen med egendefinerte gradient-funksjoner for linje og fyll. Åpner i nettleseren.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        Dette viser styrken i oppfølgingsprompts: AI-en bygger videre på eget arbeid, bevarer funksjonaliteten, og endrer bare det som ble bedt om. En vag forespørsel (&laquo;litt psykedelisk&raquo;) gir et kreativt og umiddelbart fungerende resultat.
+    </div>
+
+    <!-- STEG 4 -->
+    <h2 id="steg4">4. Instruktorsiden</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Nå har jeg lagt inn en fil <code>opplegg.md</code>, kan du bruke den til å lage en nettside som viser gruppelærerne hva som skal være innholdet i timen, samt løsninger/demonstrasjoner på hva som vil bli laget av Claude Code i timen. Ta også med både den vanlige og den psykedeliske befolkningsoversikten!</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Leser <code>opplegg.md</code>. Oppretter tre filer: <code>befolkning.html</code> (ren versjon), <code>befolkning-psykedelisk.html</code> (kopi av forrige), og ny <code>index.html</code> (instruktorguide). Guiden har sticky navigasjon, visuell tidsplan, leselekse med lenker, alle demo-prompts med diskusjonspoeng, og innebygde iframes med tab-veksling mellom de to versjonene.</p>
+    </div>
+
+    <div class="action">Claude Code tolker en Markdown-fil med seminarstruktur og produserer en komplett, navigerbar nettside med all informasjon strukturert for gruppelærere. Befolkningsvisualiseringene er innebygd som iframes med tab-grensesnitt.</div>
+
+    <!-- STEG 5 -->
+    <h2 id="steg5">5. Furo-redesign og innholdsendring</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Alle tre tekstene skal være obligatoriske. Kan du få siden til å se mer ut som Furo-designet i ReadTheDocs. Liker det litt mer minimalistisk.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Skriver om hele <code>index.html</code>: fast sidebar med navigasjon og scroll-highlight, hvit bakgrunn, enkel tabell i stedet for tidslinjekort, admonitions med tynn venstrekant (Furo-stil), minimalistisk typografi. Alle tre tekster er nå obligatoriske.</p>
+    </div>
+
+    <div class="action">Komplett redesign fra fargerikt card-basert layout til minimalistisk Furo/ReadTheDocs-stil. Innholdsendring: Cappelli-teksten flyttes fra &laquo;valgfritt tillegg&raquo; til obligatorisk. Cirka 300 linjer CSS omskrevet.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        AI-en forstod en vag stilreferanse (&laquo;Furo-designet i ReadTheDocs&raquo;) og produserte en gjenkjennelig tolkning: sidebar-navigasjon, rent typografi-fokus, admonition-bokser. Den håndterte også innholdsendringen (obligatoriske tekster) i samme operasjon.
+    </div>
+
+    <!-- STEG 6 -->
+    <h2 id="steg6">6. Dynamisk iframe-tilpasning</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Kan du få befolkningsutviklingseksemplene til å alltid passe? Altså rett størrelse på iframe? Bra den er i iframe siden du skal illustrere en standalone annen ting.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Fjerner fast høyde (560px) fra iframene. Legger til dynamisk resizing: iframene sender <code>postMessage</code> med sin <code>scrollHeight</code> etter at Chart.js har rendret (asynkront etter API-kall), og foreldresiden lytter og setter høyden. Også <code>window.resize</code>-handler for rekalkulering.</p>
+    </div>
+
+    <div class="action">Endringer i tre filer: <code>index.html</code> (fjern fast høyde, legg til message-listener og resize-handler), <code>befolkning.html</code> og <code>befolkning-psykedelisk.html</code> (legg til postMessage etter chart-rendering).</div>
+
+    <!-- STEG 7 -->
+    <h2 id="steg7">7. Testing av Demo 2 og Demo 3</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Vi trenger også at du tester de neste promptene, for å se om de faktisk illustrerer noen problemer. Sjekk ut og legg så til det som ble produsert.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Starter to parallelle agenter &mdash; en for hver demo-prompt. Resultatene:</p>
+        <ul>
+            <li><strong>Demo 2 (Frost API):</strong> Produserte velskrevet Python-script med riktig endepunkt, stasjon og auth. Feilet med HTTP 401 &mdash; mangler API-nøkkel. Bekrefter hypotesen: koden <em>ser</em> riktig ut men fungerer ikke.</li>
+            <li><strong>Demo 3 (Primtall):</strong> Reproduserte Euklids bevis korrekt. Python-script verifiserte alle 20 steg. Fungerte perfekt &mdash; men illustrerer reproduksjon av kjent kunnskap, ikke genuin oppdagelse.</li>
+        </ul>
+        <p>Integrerer resultatene som sammenleggbare detalj-seksjoner med terminal-output i instruktorsiden.</p>
+    </div>
+
+    <div class="action">Claude Code bruker Agent-verktøyet til å kjøre begge demoer som selvstendige subprosesser i parallell. Hver agent skriver kode, kjører den, dokumenterer resultatet, og rapporterer tilbake. Resultatene integreres i index.html som &lt;details&gt;-elementer med stilisert terminal-output.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        Begge demoene fungerte som forventet i opplegget: Demo 2 avslørte begrensninger (kan ikke skaffe API-nøkkel, kan ikke verifisere), Demo 3 viste styrker (klar presentasjon, korrekt kode) men også at det er reproduksjon. AI-en var i stand til å teste seg selv og dokumentere egne begrensninger.
+    </div>
+
+    <!-- STEG 8 -->
+    <h2 id="steg8">8. Denne siden</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Kan du nå, som en separat side på nettsiden, legge inn samtaleloggen fra interaksjonen vi har hatt akkurat nå, slik at gruppelærerne kan forstå hvordan denne nettsiden ble til?</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Oppretter <code>samtale.html</code> med komplett samtalelogg i Furo-stil, og lenker den fra sidebaren i <code>index.html</code>.</p>
+    </div>
+
+    <div class="action">Meta-øyeblikk: AI-en dokumenterer sin egen samtale. Denne siden er resultatet.</div>
+
+    <!-- STEG 9 -->
+    <h2 id="steg9">9. Ødelagt lenke til samtaleloggen</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Fint, eneste er at når jeg er på den vanlige nettsiden nå så fungerer ikke lenken til samtaleloggen.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Finner feilen: smooth-scroll JavaScript-handleren kaller <code>preventDefault()</code> på <em>alle</em> sidebar-lenker, inkludert den eksterne til <code>samtale.html</code>. Fikser ved å hoppe over lenker som ikke starter med <code>#</code>.</p>
+    </div>
+
+    <div class="action">En-linjers fix i JavaScript: <code>if (!a.getAttribute('href').startsWith('#')) return;</code> legges til før event-listeneren. Lenken til samtaleloggen fungerer nå.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        En typisk &laquo;det fungerte i mitt hode&raquo;-feil. AI-en la til en ekstern lenke i sidebaren, men glemte at sin egen smooth-scroll-kode fanget alle klikk. Brukertesting avslørte feilen umiddelbart.
+    </div>
+
+    <!-- STEG 10 -->
+    <h2 id="steg10">10. Manglende æøå</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Hvorfor er det ikke æøå i samtaleloggen?</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Sub-agenten som skrev samtaleloggen unngikk norske spesialtegn og brukte ASCII-erstatninger: &laquo;a&raquo; for &laquo;å&raquo;, &laquo;o&raquo; for &laquo;ø&raquo;, &laquo;ae&raquo; aldri brukt. Fikser med et Python-script som erstatter ~30 ord systematisk, deretter verifiserer med regex at ingen gjenstår.</p>
+    </div>
+
+    <div class="action">To runder med Python-basert søk-og-erstatt. Først de vanlige ordene (får, gjør, størrelse, nøkkel, verktøy, osv.), deretter resterende &laquo;a&raquo; som burde vært &laquo;å&raquo; (for å, til å, osv.). Grep-verifisering bekrefter at alle er fikset.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        AI-agenter som kjører som subprosesser arver ikke nødvendigvis kontekst om språk og tegnsett. Hovedagenten skrev perfekt norsk, men sub-agenten (som genererte samtaleloggen) falt tilbake til ASCII. Et godt eksempel på at delegering til AI-underagenter kan introdusere uventede kvalitetsproblemer.
+    </div>
+
+    <!-- STEG 11 -->
+    <h2 id="steg11">11. Oppdatert samtalelogg</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Fint, få nå med de siste interaksjonene våre.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Legger til steg 9 (ødelagt lenke), steg 10 (manglende æøå) og steg 11 (denne oppdateringen) i samtaleloggen. Oppdaterer sidebaren.</p>
+    </div>
+
+    <div class="action">Rekursivt meta-øyeblikk: AI-en oppdaterer dokumentasjonen av sin egen samtale med de siste interaksjonene &mdash; inkludert interaksjonen der brukeren ber om nettopp denne oppdateringen.</div>
+
+    <!-- REFLEKSJON -->
+    <h2 id="refleksjon">Refleksjon</h2>
+
+    <p>Noen observasjoner fra denne samtalen som er relevante for seminardiskusjonen:</p>
+
+    <p><strong>Hva fungerte godt:</strong></p>
+    <ul>
+        <li>Fra tom mappe til fungerende nettside med live SSB-data på under ett minutt (første utkast)</li>
+        <li>Iterativ forbedring: psykedelisk versjon, Furo-redesign, iframe-tilpasning &mdash; alt styrt av korte, naturligspråklige instruksjoner</li>
+        <li>Evne til å tolke vage referanser (&laquo;Furo-designet&raquo;, &laquo;litt psykedelisk&raquo;) og produsere gjenkjennelige resultater</li>
+        <li>Selvtesting og selvdokumentasjon av egne begrensninger (Demo 2 og 3)</li>
+    </ul>
+
+    <p><strong>Hva gikk galt:</strong></p>
+    <ul>
+        <li>Første API-kall brukte feil variabelnavn &mdash; AI-en antok feil tabellstruktur med selvsikkerhet</li>
+        <li>Feilen ble ikke oppdaget før brukeren eksplisitt ba om testing</li>
+        <li>AI-en testet ikke selv etter første skriving, til tross for at den åpnet filen i nettleseren</li>
+        <li>Samtalelogg-siden manglet æøå fordi sub-agenten som skrev den unngikk spesialtegn</li>
+        <li>Lenken til samtaleloggen ble blokkert av AI-ens egen smooth-scroll-kode</li>
+    </ul>
+
+    <p><strong>Hva dette betyr:</strong></p>
+    <ul>
+        <li>AI-en er et kraftig <em>verktøy</em>, men krever en kompetent bruker som kan vurdere resultatene</li>
+        <li>Hastigheten er imponerende, men hastighet uten verifikasjon kan være farlig</li>
+        <li>Naturlig språk som &laquo;programmeringsspråk&raquo; fungerer, men presisjon i tilbakemelding er fortsatt viktig</li>
+        <li>AI-en kan dokumentere egne begrensninger &mdash; men bare når den blir bedt om det</li>
+    </ul>
+
+    <footer>
+        HON1000 &mdash; Universitetet i Oslo &middot; Samtalelogg generert med Claude Code
+    </footer>
+
+</div>
+
+<script>
+    // Highlight active sidebar link on scroll
+    const sections = document.querySelectorAll('h2[id]');
+    const navLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(s => {
+            if (window.scrollY >= s.offsetTop - 80) current = s.id;
+        });
+        navLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+    });
+
+    navLinks.forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+</script>
+
+</body>
+</html>

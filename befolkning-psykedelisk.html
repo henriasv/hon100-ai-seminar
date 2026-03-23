@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norges befolkningsutvikling 1900–2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Monoton&family=Outfit:wght@400;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0015;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 0, 150, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 255, 200, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(120, 0, 255, 0.15) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes bgPulse {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(60deg) brightness(1.3); }
+            100% { filter: hue-rotate(120deg) brightness(1); }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: float 12s ease-in-out infinite alternate;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb:nth-child(1) { width: 300px; height: 300px; background: #ff00ff; top: 10%; left: 5%; animation-duration: 10s; }
+        .orb:nth-child(2) { width: 250px; height: 250px; background: #00ffcc; top: 60%; right: 5%; animation-duration: 14s; animation-delay: -3s; }
+        .orb:nth-child(3) { width: 200px; height: 200px; background: #ff6600; bottom: 10%; left: 30%; animation-duration: 11s; animation-delay: -7s; }
+        .orb:nth-child(4) { width: 350px; height: 350px; background: #6600ff; top: 30%; right: 20%; animation-duration: 16s; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(10px, -10px) scale(1.05); }
+        }
+
+        h1 {
+            font-family: 'Monoton', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 0.3rem;
+            background: linear-gradient(90deg, #ff00cc, #00ffff, #ff9900, #ff00cc);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s linear infinite;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            box-shadow:
+                0 0 30px rgba(255, 0, 200, 0.15),
+                0 0 60px rgba(0, 255, 200, 0.1),
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
+            animation: cardGlow 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            0% { box-shadow: 0 0 30px rgba(255, 0, 200, 0.15), 0 0 60px rgba(0, 255, 200, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(0, 200, 255, 0.2), 0 0 80px rgba(255, 0, 150, 0.15); }
+            100% { box-shadow: 0 0 30px rgba(150, 0, 255, 0.2), 0 0 60px rgba(255, 150, 0, 0.1); }
+        }
+
+        canvas { width: 100% !important; }
+
+        .slider-section {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 0, 200, 0.1);
+        }
+
+        .slider-section input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            margin: 1rem 0 0.5rem;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #ff00cc, #00ffff, #ff9900);
+            outline: none;
+        }
+        .slider-section input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 200, 0.6), 0 0 30px rgba(0, 255, 200, 0.4);
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+        .slider-section input[type="range"]::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 200, 0.9), 0 0 50px rgba(0, 255, 200, 0.6);
+        }
+
+        .population-display {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ff00cc, #00ffff, #ffcc00);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s linear infinite;
+        }
+
+        .year-display {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px rgba(255, 0, 200, 0.5);
+        }
+
+        .loading {
+            padding: 4rem;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .source {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* Stars */
+        .stars {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+        }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+
+    <div class="stars" id="stars"></div>
+
+    <h1>Norges befolkningsutvikling</h1>
+    <p class="subtitle">1900 – 2025 &middot; Kilde: SSB tabell 05803</p>
+
+    <div class="chart-container">
+        <div class="loading" id="loading">Henter data fra SSB...</div>
+        <canvas id="chart" style="display:none"></canvas>
+    </div>
+
+    <div class="slider-section" id="sliderSection" style="display:none">
+        <div class="year-display" id="yearDisplay"></div>
+        <div class="population-display" id="popDisplay"></div>
+        <input type="range" id="slider" min="0" max="0" value="0">
+    </div>
+
+    <p class="source">Data: Statistisk sentralbyrå (SSB), tabell 05803</p>
+
+    <script>
+        // Generate twinkling stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 3) + 's';
+            starsContainer.appendChild(star);
+        }
+
+        async function fetchPopulationData() {
+            const query = {
+                query: [
+                    {
+                        code: "ContentsCode",
+                        selection: { filter: "item", values: ["Personer"] }
+                    },
+                    {
+                        code: "Tid",
+                        selection: {
+                            filter: "item",
+                            values: Array.from({ length: 2025 - 1900 + 1 }, (_, i) => String(1900 + i))
+                        }
+                    }
+                ],
+                response: { format: "json-stat2" }
+            };
+
+            const res = await fetch(
+                "https://data.ssb.no/api/v0/no/table/05803",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(query)
+                }
+            );
+
+            if (!res.ok) throw new Error(`SSB API feil: ${res.status}`);
+            const data = await res.json();
+
+            const years = Object.keys(data.dimension.Tid.category.label).map(Number);
+            const values = data.value;
+
+            return years.map((year, i) => ({ year, population: values[i] }));
+        }
+
+        // Neon rainbow gradient for chart line
+        function createNeonGradient(ctx, chartArea) {
+            const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            gradient.addColorStop(0, '#ff00cc');
+            gradient.addColorStop(0.25, '#00ffff');
+            gradient.addColorStop(0.5, '#ff9900');
+            gradient.addColorStop(0.75, '#00ff66');
+            gradient.addColorStop(1, '#cc00ff');
+            return gradient;
+        }
+
+        function createFillGradient(ctx, chartArea) {
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(255, 0, 200, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(0, 255, 200, 0.1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            return gradient;
+        }
+
+        async function init() {
+            try {
+                const data = await fetchPopulationData();
+
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("chart").style.display = "block";
+                document.getElementById("sliderSection").style.display = "block";
+
+                const ctx = document.getElementById("chart").getContext("2d");
+                const chart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: data.map(d => d.year),
+                        datasets: [{
+                            label: "Befolkning",
+                            data: data.map(d => d.population),
+                            borderColor: function(context) {
+                                const chart = context.chart;
+                                const { ctx, chartArea } = chart;
+                                if (!chartArea) return '#ff00cc';
+                                return createNeonGradient(ctx, chartArea);
+                            },
+                            backgroundColor: function(context) {
+                                const chart = context.chart;
+                                const { ctx, chartArea } = chart;
+                                if (!chartArea) return 'rgba(255,0,200,0.1)';
+                                return createFillGradient(ctx, chartArea);
+                            },
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            pointHoverRadius: 8,
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#ff00cc',
+                            pointHoverBorderWidth: 3,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: { intersect: false, mode: "index" },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(10, 0, 30, 0.9)',
+                                borderColor: 'rgba(255, 0, 200, 0.5)',
+                                borderWidth: 1,
+                                titleColor: '#00ffff',
+                                bodyColor: '#fff',
+                                padding: 12,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: ctx => `${ctx.parsed.y.toLocaleString("nb-NO")} innbyggere`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    maxTicksLimit: 13,
+                                    color: 'rgba(255,255,255,0.5)',
+                                    callback: function(val) { return this.getLabelForValue(val); }
+                                },
+                                grid: { color: 'rgba(255,255,255,0.05)' }
+                            },
+                            y: {
+                                ticks: {
+                                    color: 'rgba(255,255,255,0.5)',
+                                    callback: val => (val / 1_000_000).toFixed(1) + " mill."
+                                },
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                beginAtZero: false
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: "verticalLine",
+                        afterDraw(chart) {
+                            if (chart._activeIndex == null) return;
+                            const { ctx, chartArea: { top, bottom } } = chart;
+                            const x = chart.getDatasetMeta(0).data[chart._activeIndex]?.x;
+                            if (!x) return;
+                            ctx.save();
+                            const grad = ctx.createLinearGradient(0, top, 0, bottom);
+                            grad.addColorStop(0, 'rgba(255, 0, 200, 0.8)');
+                            grad.addColorStop(0.5, 'rgba(0, 255, 255, 0.6)');
+                            grad.addColorStop(1, 'rgba(255, 0, 200, 0)');
+                            ctx.strokeStyle = grad;
+                            ctx.lineWidth = 2;
+                            ctx.shadowColor = '#ff00cc';
+                            ctx.shadowBlur = 10;
+                            ctx.beginPath();
+                            ctx.moveTo(x, top);
+                            ctx.lineTo(x, bottom);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }]
+                });
+
+                const slider = document.getElementById("slider");
+                slider.max = data.length - 1;
+                slider.value = data.length - 1;
+
+                function updateSlider(idx) {
+                    const d = data[idx];
+                    document.getElementById("yearDisplay").textContent = d.year;
+                    document.getElementById("popDisplay").textContent =
+                        d.population.toLocaleString("nb-NO") + " innbyggere";
+                    chart._activeIndex = idx;
+                    chart.update("none");
+                }
+
+                slider.addEventListener("input", e => updateSlider(+e.target.value));
+                updateSlider(data.length - 1);
+
+                // Notify parent iframe to resize
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'iframe-resize', height: document.documentElement.scrollHeight }, '*');
+                }
+
+            } catch (err) {
+                document.getElementById("loading").textContent =
+                    "Kunne ikke hente data: " + err.message;
+                console.error(err);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norges befolkningsutvikling 1900–2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f4f8;
+            color: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #555; margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .chart-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+        }
+        canvas { width: 100% !important; }
+        .slider-section {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        .slider-section input[type="range"] {
+            width: 100%;
+            margin: 1rem 0 0.5rem;
+            accent-color: #1a5276;
+        }
+        .population-display { font-size: 2.2rem; font-weight: 700; color: #1a5276; }
+        .year-display { font-size: 1.3rem; font-weight: 600; color: #333; }
+        .loading { padding: 4rem; text-align: center; color: #666; }
+        .source { margin-top: 1rem; font-size: 0.8rem; color: #888; }
+    </style>
+</head>
+<body>
+    <h1>Norges befolkningsutvikling</h1>
+    <p class="subtitle">1900 – 2025 &middot; Kilde: SSB tabell 05803</p>
+    <div class="chart-container">
+        <div class="loading" id="loading">Henter data fra SSB...</div>
+        <canvas id="chart" style="display:none"></canvas>
+    </div>
+    <div class="slider-section" id="sliderSection" style="display:none">
+        <div class="year-display" id="yearDisplay"></div>
+        <div class="population-display" id="popDisplay"></div>
+        <input type="range" id="slider" min="0" max="0" value="0">
+    </div>
+    <p class="source">Data: Statistisk sentralbyrå (SSB), tabell 05803</p>
+    <script>
+        async function fetchPopulationData() {
+            const query = {
+                query: [
+                    { code: "ContentsCode", selection: { filter: "item", values: ["Personer"] } },
+                    { code: "Tid", selection: { filter: "item", values: Array.from({ length: 2025 - 1900 + 1 }, (_, i) => String(1900 + i)) } }
+                ],
+                response: { format: "json-stat2" }
+            };
+            const res = await fetch("https://data.ssb.no/api/v0/no/table/05803", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(query)
+            });
+            if (!res.ok) throw new Error(`SSB API feil: ${res.status}`);
+            const data = await res.json();
+            const years = Object.keys(data.dimension.Tid.category.label).map(Number);
+            const values = data.value;
+            return years.map((year, i) => ({ year, population: values[i] }));
+        }
+
+        async function init() {
+            try {
+                const data = await fetchPopulationData();
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("chart").style.display = "block";
+                document.getElementById("sliderSection").style.display = "block";
+
+                const ctx = document.getElementById("chart").getContext("2d");
+                const chart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: data.map(d => d.year),
+                        datasets: [{
+                            label: "Befolkning",
+                            data: data.map(d => d.population),
+                            borderColor: "#1a5276",
+                            backgroundColor: "rgba(26, 82, 118, 0.1)",
+                            fill: true, tension: 0.3,
+                            pointRadius: 0, pointHoverRadius: 6, borderWidth: 2.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: { intersect: false, mode: "index" },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toLocaleString("nb-NO")} innbyggere` } }
+                        },
+                        scales: {
+                            x: { ticks: { maxTicksLimit: 13, callback: function(val) { return this.getLabelForValue(val); } } },
+                            y: { ticks: { callback: val => (val / 1_000_000).toFixed(1) + " mill." }, beginAtZero: false }
+                        }
+                    },
+                    plugins: [{
+                        id: "verticalLine",
+                        afterDraw(chart) {
+                            if (chart._activeIndex == null) return;
+                            const { ctx, chartArea: { top, bottom } } = chart;
+                            const x = chart.getDatasetMeta(0).data[chart._activeIndex]?.x;
+                            if (!x) return;
+                            ctx.save(); ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 2;
+                            ctx.setLineDash([4, 4]); ctx.beginPath();
+                            ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke(); ctx.restore();
+                        }
+                    }]
+                });
+
+                const slider = document.getElementById("slider");
+                slider.max = data.length - 1;
+                slider.value = data.length - 1;
+                function updateSlider(idx) {
+                    const d = data[idx];
+                    document.getElementById("yearDisplay").textContent = d.year;
+                    document.getElementById("popDisplay").textContent = d.population.toLocaleString("nb-NO") + " innbyggere";
+                    chart._activeIndex = idx;
+                    chart.update("none");
+                }
+                slider.addEventListener("input", e => updateSlider(+e.target.value));
+                updateSlider(data.length - 1);
+
+                // Notify parent iframe to resize
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'iframe-resize', height: document.documentElement.scrollHeight }, '*');
+                }
+            } catch (err) {
+                document.getElementById("loading").textContent = "Kunne ikke hente data: " + err.message;
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
