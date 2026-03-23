@@ -227,6 +227,7 @@
         <li><a href="#steg9">9. Ødelagt lenke</a></li>
         <li><a href="#steg10">10. Manglende æøå</a></li>
         <li><a href="#steg11">11. Oppdatert logg</a></li>
+        <li><a href="#steg12">12. Publisering</a></li>
         <div class="sep"></div>
         <li><a href="#refleksjon">Refleksjon</a></li>
     </ul>
@@ -238,7 +239,7 @@
     <p class="lead">Hvordan denne nettsiden ble laget &mdash; en komplett logg av samtalen mellom menneske og AI</p>
 
     <h2 id="intro">Kontekst</h2>
-    <p>Denne siden dokumenterer den faktiske samtalen mellom en seminarleder og Claude Code (Claude Opus 4.6) som produserte hele gruppelærerguiden. Samtalen fant sted 23. mars 2026 og tok 11 interaksjoner fra tomt prosjekt til ferdig nettside.</p>
+    <p>Denne siden dokumenterer den faktiske samtalen mellom en seminarleder og Claude Code (Claude Opus 4.6) som produserte hele gruppelærerguiden. Samtalen fant sted 23. mars 2026 og tok 12 interaksjoner fra tomt prosjekt til ferdig nettside.</p>
     <p>Mappen var helt tom da vi startet. Alt &mdash; HTML, CSS, JavaScript, API-integrasjoner, testresultater &mdash; ble produsert i denne ene samtalen.</p>
 
     <div class="admonition note">
@@ -450,6 +451,26 @@
     </div>
 
     <div class="action">Rekursivt meta-øyeblikk: AI-en oppdaterer dokumentasjonen av sin egen samtale med de siste interaksjonene &mdash; inkludert interaksjonen der brukeren ber om nettopp denne oppdateringen.</div>
+
+    <!-- STEG 12 -->
+    <h2 id="steg12">12. Publisering på GitHub Pages</h2>
+
+    <div class="msg msg-user">
+        <div class="msg-label">Bruker</div>
+        <p>Ok, nå ønsker jeg å publisere på GitHub Pages, vha min GitHub-bruker henriasv, som er konfigurert på denne maskinen. Hjelp meg så mye som mulig med dette. Vi trenger et nytt repo, men gi meg gjerne en lenke som sender meg noe så ferdig utfylt som mulig.</p>
+    </div>
+
+    <div class="msg msg-ai">
+        <div class="msg-label">Claude Code</div>
+        <p>Oppretter repoet <code>hon100-ai-seminar</code> via <code>gh</code> CLI, initialiserer git, lager <code>.gitignore</code>, committer alle filer, pusher, aktiverer GitHub Pages via API, og legger til en GitHub Actions deploy-workflow. Alt i én operasjon.</p>
+    </div>
+
+    <div class="action">Claude Code kjører 8 kommandoer i sekvens: (1) <code>gh repo create</code> med beskrivelse og homepage, (2) <code>git init</code> + remote, (3) <code>.gitignore</code> for .venv og .claude, (4) <code>git add</code> av alle relevante filer, (5) commit, (6) push, (7) aktivering av Pages via GitHub API, (8) opprettelse og push av Actions-workflow for deploy. Siden er live på <a href="https://henriasv.github.io/hon100-ai-seminar/">henriasv.github.io/hon100-ai-seminar</a>.</div>
+
+    <div class="admonition note">
+        <div class="admonition-title">Læringspoeng</div>
+        AI-en håndterte hele publiseringsprosessen &mdash; fra repo-opprettelse til live nettside &mdash; uten at brukeren måtte forlate terminalen. Den visste at GitHub Pages med <code>build_type: workflow</code> krever en Actions-fil, og la den til proaktivt. Hele prosessen tok under et minutt.
+    </div>
 
     <!-- REFLEKSJON -->
     <h2 id="refleksjon">Refleksjon</h2>
